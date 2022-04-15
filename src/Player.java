@@ -35,6 +35,10 @@ public class Player
 		{
 			y = Game.HEIGHT - heigth;
 		}
+		else if(y > 111)
+		{
+			y = 111;
+		}
 	}
 	public void render(Graphics g)
 	{
