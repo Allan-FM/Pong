@@ -1,48 +1,107 @@
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
 
-public class Player 
-{
-	public boolean up;
-	public boolean down;
-	
-	public int x;
-	public int y;
-	
-	public int width;
-	public int heigth;
-	
-	public Player(int x, int y)
-	{
-		this.x = x;
-		this.y = y;
-		this.width = 4;
-		this.heigth = 2;
+public class Player implements Runnable {
+
+	int x, y, yDirection, id;
+
+	public Rectangle player;
+
+	public Player(int xJogador, int yJogador, int idJogador) {
+		this.x = xJogador;
+		this.y = yJogador;
+		this.id = idJogador;
+
+		player = new Rectangle(x, y, 10, 50);
+	}
+
+	public int getyDirection() {
+		return yDirection;
+	}
+
+	public void setyDirection(int yDirection) {
+		this.yDirection = yDirection;
+	}
+
+	@Override
+	public void run() {
+		try {
+			while (true) {
+				move();
+				Thread.sleep(7);
+			}
+		} catch (Exception e) {
+
+		}
+
+	}
+
+	private void move() {
+		player.y += getyDirection();
+		if (player.y <= 30) {
+			player.y = 30;
+		}
+		if (player.y >= 340) {
+			player.y = 340;
+		}
 	}
 	
+	public void draw(Graphics g) {
+		switch(id) {
+		default:
+			System.out.println("Não é um id valido");
+			break;
+		case 1:
+			g.setColor(Color.white);
+			g.fillRect(player.x, player.y, player.width, player.height);
+			break;
+		case 2:
+			g.setColor(Color.white);
+			g.fillRect(player.x, player.y, player.width, player.height);
+			break;
+		}
+	}
 	
-	public void tick()
-	{
-		if(up)
-		{
-			y++;
-		}
-		else if(down)
-		{
-			y--;
-		}
-		if(y + heigth < Game.HEIGHT)
-		{
-			y = Game.HEIGHT - heigth;
-		}
-		else if(y > 111)
-		{
-			y = 111;
+	public void keyPressed(KeyEvent e) {
+		switch(id) {
+		default:
+			System.out.println("Não é um id valido");
+			break;
+		case 1:
+			if(e.getKeyCode() == KeyEvent.VK_W)
+				setyDirection(-1);
+			if(e.getKeyCode() == KeyEvent.VK_S)
+				setyDirection(1);
+			break;
+		case 2:
+			if(e.getKeyCode() == KeyEvent.VK_UP)
+				setyDirection(-1);
+			if(e.getKeyCode() == KeyEvent.VK_DOWN)
+				setyDirection(1);
+			break;
 		}
 	}
-	public void render(Graphics g)
-	{
-		g.setColor(Color.white);
-		g.fillRect(x, y, 4,30);
+	
+	public void keyReleased(KeyEvent e) {
+		switch(id) {
+		default:
+			System.out.println("Não é um id valido");
+			break;
+		case 1:
+			if(e.getKeyCode() == KeyEvent.VK_W)
+				setyDirection(0);
+			if(e.getKeyCode() == KeyEvent.VK_S)
+				setyDirection(0);
+			break;
+		case 2:
+			if(e.getKeyCode() == KeyEvent.VK_UP)
+				setyDirection(0);
+			if(e.getKeyCode() == KeyEvent.VK_DOWN)
+				setyDirection(0);
+			break;
+		}
 	}
+
 }

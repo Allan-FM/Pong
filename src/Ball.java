@@ -1,38 +1,97 @@
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.util.Random;
 
-public class Ball 
-{
-	public int x;
-	public int y;
-	
-	public int width;
-	public int heigth;
-	
-	public double dirX;
-	public double dirY;
-	public double speed = 2.5;
-	
-	public Ball(int x, int y)
-	{
-		this.x = x;
-		this.y = y;
-		this.width = 4;
-		this.heigth = 4;
+public class Ball implements Runnable {
+
+	int x, y, xDirection, yDirection;
+
+	Rectangle bola;
+
+	int p1ponto, p2ponto;
+
+	Player p1 = new Player(10, 25, 1);
+	Player p2 = new Player(485, 25, 2);
+
+	public Ball(int xBall, int yBall) {
+		p1ponto = p2ponto = 0;
+		this.x = xBall;
+		this.y = yBall;
+
+		Random r = new Random();
+		moveBola(r);
+
+		bola = new Rectangle(this.x, this.y, 15, 15);
+	}
+
+	private void moveBola(Random r) {
+		int rXDir = r.nextInt(1);
+		if (rXDir == 0)
+			rXDir--;
+		setxDirection(rXDir);
+		int rYDir = r.nextInt(1);
+		if (rYDir == 0)
+			rYDir--;
+		setyDirection(rYDir);
+	}
+
+	public void draw(Graphics gb) {
+		gb.setColor(Color.WHITE);
+		gb.fillOval(bola.x, bola.y, 15, 15);
+	}
+
+	public void setxDirection(int xDirection) {
+		this.xDirection = xDirection;
+	}
+
+	public void setyDirection(int yDirection) {
+		this.yDirection = yDirection;
+	}
+
+	@Override
+	public void run() {
+		try {
+			while (Game.isJogo()) {
+				move();
+				Thread.sleep(8);
+			}
+		} catch (Exception e) {
+			Game.setJogo(false);
+		}
+
+	}
+
+	private void move() {
+		colisao();
+		bola.x += xDirection;
+		bola.y += yDirection;
+
+		if (bola.x <= 0) {
+			setxDirection(+1);
+			p2ponto++;
+			bola.setLocation(x, y);
+		}
+		if (bola.x >= 485) {
+			setxDirection(-1);
+			p1ponto++;
+			bola.setLocation(x, y);
+		}
+		if (bola.y <= 15) {
+			setyDirection(+1);
+		}
+		if (bola.y >= 385) {
+			setyDirection(-1);
+		}
+
+	}
+
+	private void colisao() {
+		if(bola.intersects(p1.player))
+			setxDirection(+1);
+		if(bola.intersects(p2.player))
+			setxDirection(-1);
 		
-		dirX = new Random().nextGaussian();
-		dirY = new Random().nextGaussian();
 	}
-	public void tick()
-	{
-		x += dirX * speed;
-		y += dirY * speed;
-		
-	}
-	public void render(Graphics g)
-	{
-		g.setColor(Color.white);
-		g.fillRect(x, y, width, heigth);
-	}
+
 }

@@ -1,122 +1,104 @@
-import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.image.BufferStrategy;
-import java.awt.image.BufferedImage;
 
 import javax.swing.JFrame;
 
-public class Game extends Canvas implements Runnable, KeyListener
-{
-
+public class Game extends JFrame{
 	private static final long serialVersionUID = 1L;
-	private static int width = 240;
-	private static int heigth = 140;
-	private static int scale = 3;
-	
-	public static Player player;
-	public static Enemy enemy;
-	public static Ball ball;
-	
-	public BufferedImage layer = new BufferedImage(width, heigth, BufferedImage.TYPE_INT_RGB);
-	
-	public Game()
-	{ 
-		this.setPreferredSize(new Dimension(width * scale, heigth * scale));
-		this.addKeyListener(this);
-		player = new Player(0,50);
-		enemy = new Enemy(236, 50);
-		ball = new Ball(100, heigth / 2 - 1);
+
+	int gWidth = 500;
+	int gHeight = 400;
+	Dimension screenSize = new Dimension(gWidth, gHeight);
+
+	Image dbImage;
+	Graphics dbGraphics;
+
+	static boolean game = true;
+	boolean gameOver;
+
+	static Ball b = new Ball(250, 200);
+
+	public Game() {
+		this.setTitle("Pong");
+		this.setSize(screenSize);
+		this.setResizable(false);
+		this.setLocationRelativeTo(null);
+		this.setVisible(true);
+		this.setBackground(Color.black);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.addKeyListener(new AL());
 	}
-	
-	public static void main(String[] args)
-	{
-		Game game = new Game();
-		JFrame frame =  new JFrame("Pong");
-		frame.setResizable(false);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.add(game);
-		frame.pack();
-		frame.setLocationRelativeTo(null);
-		frame.setVisible(true);
-		
-		new Thread(game).start();
-	}
-	public void tick()
-	{
-		player.tick();
-		enemy.tick();
-		ball.tick();
-	}
-	public void render()
-	{
-		BufferStrategy bs = this.getBufferStrategy();
-		if(bs == null)
-		{
-			this.createBufferStrategy(3);
-			return;
-		}
-		Graphics g = layer.getGraphics();
-		g.setColor(Color.black);
-		g.fillRect(0, 0, width, heigth);
-		player.render(g);
-		enemy.render(g);
-		ball.render(g);
-		g = bs.getDrawGraphics();
-		g.drawImage(layer, 0, 0,width * scale, heigth * scale, null);
-		
-		bs.show();
-	}
-	@Override
-	public void run() 
-	{
-		while(true)
-		{
-			tick();
-			render();
-			try 
-			{
-				Thread.sleep(1000/60);
-			} catch (InterruptedException e) 
-			{
-				e.printStackTrace();
-			}
-		}
+
+	public static void main(String[] args) {
+
+		Game pg = new Game();
+		Thread bola = new Thread(b);
+		bola.start();
+		Thread p1 = new Thread(b.p1);
+		Thread p2 = new Thread(b.p2);
+		p2.start();
+		p1.start();
+
 	}
 
 	@Override
-	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
+	public void paint(Graphics g) {
+		dbImage = createImage(getWidth(), getHeight());
+		dbGraphics = dbImage.getGraphics();
+		draw(dbGraphics);
+		g.drawImage(dbImage, 0, 0, this);
 	}
 
-	@Override
-	public void keyPressed(KeyEvent e) {
-		if(e.getKeyCode() == KeyEvent.VK_UP)
-		{
-			player.down = true;
-		}
-		else if(e.getKeyCode() == KeyEvent.VK_DOWN)
-		{
-			player.up = true;
-		}
-		
+	public void draw(Graphics g) {
+		b.draw(g);
+		b.p1.draw(g);
+		b.p2.draw(g);
+		getScore(g);
+		repaint();
 	}
 
-	@Override
-	public void keyReleased(KeyEvent e) {
-		if(e.getKeyCode() == KeyEvent.VK_UP)
-		{
-			player.down = false;
+	private void getScore(Graphics g) {
+		g.setColor(Color.WHITE);
+		g.drawString("Jogador  " + b.p1ponto, 40, 40);
+		g.drawString("Jogador  " + b.p2ponto, 385, 40);
+		g.setColor(Color.WHITE);
+		if (b.p1ponto >= 6 || b.p2ponto >= 6) {
+			setJogo(false);
+			gameOver = true;
 		}
-		else if(e.getKeyCode() == KeyEvent.VK_DOWN)
-		{
-			player.up = false;
-		}
-		
+		if (gameOver)
+			g.drawString("Game Over", 200, 200);
+		g.setColor(Color.WHITE);
 	}
 
+	public class AL extends KeyAdapter {
+		@Override
+		public void keyPressed(KeyEvent e) {
+			b.p1.keyPressed(e);
+			b.p2.keyPressed(e);
+		}
+
+		@Override
+		public void keyReleased(KeyEvent e) {
+			b.p1.keyReleased(e);
+			b.p2.keyReleased(e);
+		}
+
+	}
+
+	public static boolean isJogo() {
+		return game;
+	}
+
+	public boolean isGameOver() {
+		return gameOver;
+	}
+
+	public static void setJogo(boolean jogo) {
+		Game.game = jogo;
+	}
 }
